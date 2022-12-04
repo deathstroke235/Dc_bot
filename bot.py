@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
 import keys
+import googletrans
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
-client = commands.Bot(command_prefix="-p",intents=intents)
+client = commands.Bot(command_prefix="-p ",intents=intents)
 is_client_running=False
 
 @client.event
@@ -25,13 +26,28 @@ async def on_message(message):
     if message.content.lower().startswith('hello'):
         await message.channel.send(f"Hello {message.author.mention}")
         return
-
-    if not message.content.startswith('!'):
+    if not message.content.startswith('-p '):
         return
 
     # Process command
     async with message.channel.typing():
         await client.process_commands(message)
+
+@client.command(aliases=['tr'])
+async def translate(ctx, lang_to, *args):
+    """
+    Translates the given text to the language `lang_to`.
+    The language translated from is automatically detected.
+    """
+
+    lang_to = lang_to.lower()
+    if lang_to not in googletrans.LANGUAGES and lang_to not in googletrans.LANGCODES:
+        raise commands.BadArgument("Invalid language to translate text to")
+
+    text = ' '.join(args)
+    translator = googletrans.Translator()
+    text_translated = translator.translate(text, dest=lang_to).text
+    await ctx.send(text_translated)
 
 @client.command(aliases=['youHaveBeenTerminated'])
 @commands.is_owner()
