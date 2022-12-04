@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import keys
 import googletrans
+from help_cog import help_cog
+from music_cog import music_cog
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
@@ -32,6 +34,13 @@ async def on_message(message):
     # Process command
     async with message.channel.typing():
         await client.process_commands(message)
+
+client.remove_command('help')
+
+#register the class with the bot
+client.add_cog(help_cog(client))
+client.add_cog(music_cog(client))
+
 
 @client.command(aliases=['tr'])
 async def translate(ctx, lang_to, *args):
